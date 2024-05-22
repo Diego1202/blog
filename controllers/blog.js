@@ -5,11 +5,10 @@ const jwt = require('jsonwebtoken')
 
 const blogRouter = Router()
 
-const verify = (req, res, next) => {
+const verify = (req, res) => {
 	const decodedToken = jwt.verify(req.token, process.env.SECRET)
-	if (!decodedToken.id) return res.status(401).json({ error: 'token invalid' })
+	if (!decodedToken.id) return res.status(401).json({ error: 'token invalido' })
 	return decodedToken
-
 }
 
 blogRouter.get('/', async (req, res, next) => {
@@ -17,7 +16,7 @@ blogRouter.get('/', async (req, res, next) => {
 		const token = verify(req, res, next)
 		await Blog
 			.find({ user: token.id }).populate('user', { username: 1, name: 1 })
-			.then(blogs => res.json(blogs))
+			.then(blogs => { res.status(200).json(blogs) })
 	} catch (error) {
 		next(error)
 	}
@@ -35,10 +34,11 @@ blogRouter.get('/:id', async (req, res, next) => {
 		}).catch(error => next(error))
 })
 
-blogRouter.post('/', async (req, res) => {
-	const { userId, title, author, url, likes } = req.body
+blogRouter.post('/', async (req, res, next) => {
+	const { title, author, url, likes } = req.body
+	const token = verify(req, res, next)
 
-	const user = await User.findOne({ _id: userId })
+	const user = await User.findOne({ _id: token.id })
 	if (!user) res.status(400).json({ error: 'User not found' })
 
 	const blog = new Blog({

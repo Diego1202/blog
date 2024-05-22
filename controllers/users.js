@@ -22,7 +22,6 @@ usersRouter.post('/', async (req, res, next) => {
 	user.save().then(savedUser => {
 		res.status(201).json(savedUser)
 	}).catch(error => next(error))
-
 })
 
 module.exports = usersRouter
