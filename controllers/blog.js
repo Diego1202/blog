@@ -13,10 +13,16 @@ const verify = (req, res) => {
 
 blogRouter.get('/', async (req, res, next) => {
 	try {
-		const token = verify(req, res, next)
-		await Blog
-			.find({ user: token.id }).populate('user', { username: 1, name: 1 })
-			.then(blogs => { res.status(200).json(blogs) })
+		if (req.token) {
+			const token = verify(req, res, next)
+			await Blog
+				.find({ user: token.id }).populate('user', { username: 1, name: 1 })
+				.then(blogs => { res.status(200).json(blogs) })
+		} else {
+			await Blog
+				.find().populate('user', { username: 1, name: 1 })
+				.then(blogs => { res.status(200).json(blogs) })
+		}
 	} catch (error) {
 		next(error)
 	}
