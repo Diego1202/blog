@@ -74,4 +74,18 @@ blogRouter.delete('/:id', async (req, res, next) => {
 		}).catch(error => next(error))
 })
 
+blogRouter.put('/:id', async (req, res, next) => {
+	const { title, author, url, likes } = req.body
+	const token = verify(req, res, next)
+
+	const user = await User.findOne({ _id: token.id })
+	if (!user) res.status(400).json({ error: 'User not found' })
+
+	await Blog
+		.findByIdAndUpdate(req.params.id, { title, author, url, likes })
+		.then((updated) => {
+			res.status(204).json(updated)
+		}).catch(error => next(error))
+})
+
 module.exports = blogRouter
