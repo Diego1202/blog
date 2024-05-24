@@ -75,16 +75,17 @@ blogRouter.delete('/:id', async (req, res, next) => {
 })
 
 blogRouter.put('/:id', async (req, res, next) => {
-	const { title, author, url, likes } = req.body
 	const token = verify(req, res, next)
+	const { title, author, url, likes } = req.body
 
 	const user = await User.findOne({ _id: token.id })
 	if (!user) res.status(400).json({ error: 'User not found' })
 
 	await Blog
-		.findByIdAndUpdate(req.params.id, { title, author, url, likes })
+		.findByIdAndUpdate(req.params.id, { title, author, url, likes },
+			{ new: true, runValidators: true, context: 'query' })
 		.then((updated) => {
-			res.status(204).json(updated)
+			res.status(200).json(updated)
 		}).catch(error => next(error))
 })
 
